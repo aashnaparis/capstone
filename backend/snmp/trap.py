@@ -69,3 +69,4 @@ def dead_node_trap(node_id, battery_lvl, severity="FAULT"):
             ('1.3.6.1.4.1.99999.4.4', OctetString("Node is offline"))
         )
     )
+    
