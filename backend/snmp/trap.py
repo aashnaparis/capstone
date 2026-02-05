@@ -15,9 +15,9 @@ def alarm_trap(node_id,severity="CRITICAL"):
         NotificationType(
             ObjectIdentity(ALARM_TRAP)
         ).addVarBinds(
-            ('1.3.6.1.4.1.99999.1.1', OctetString(node_id)),
-            ('1.3.6.1.4.1.99999.1.2', OctetString(severity)),
-            ('1.3.6.1.4.1.99999.1.3', OctetString("Emergency Button Pressed"))
+            (ALARM_TRAP_NODE , OctetString(node_id)),
+            (ALARM_TRAP_SEV , OctetString(severity)),
+            (ALARM_TRAP_MSG , OctetString("Emergency Button Pressed"))
         )
     )
 
@@ -31,9 +31,9 @@ def low_battery_trap(node_id, battery_lvl, severity="WARNING"):
         NotificationType(
             ObjectIdentity(LOW_BATTERY_TRAP)
         ).addVarBinds(
-            ('1.3.6.1.4.1.99999.2.1', OctetString(node_id)),
-            ('1.3.6.1.4.1.99999.2.2', OctetString(severity)),
-            ('1.3.6.1.4.1.99999.2.3', Integer(battery_lvl))
+            (LOW_BATT_NODE, OctetString(node_id)),
+            (LOW_BATT_SEV, OctetString(severity)),
+            (LOW_BATT_BATT, Integer(battery_lvl))
         )
     )
 
@@ -47,9 +47,9 @@ def dead_battery_trap(node_id, battery_lvl, severity="MAJOR"):
         NotificationType(
             ObjectIdentity(DEAD_BATTERY_TRAP)
         ).addVarBinds(
-            ('1.3.6.1.4.1.99999.3.1', OctetString(node_id)),
-            ('1.3.6.1.4.1.99999.3.2', OctetString(severity)),
-            ('1.3.6.1.4.1.99999.3.3', Integer(battery_lvl))
+            (DEAD_BATT_NODE, OctetString(node_id)),
+            (DEAD_BATT_SEV, OctetString(severity)),
+            (DEAD_BATT_BATT, Integer(battery_lvl))
         )
     )
 
@@ -63,10 +63,10 @@ def dead_node_trap(node_id, battery_lvl, severity="FAULT"):
         NotificationType(
             ObjectIdentity(NODE_FAILURE_TRAP)
         ).addVarBinds(
-            ('1.3.6.1.4.1.99999.4.1', OctetString(node_id)),
-            ('1.3.6.1.4.1.99999.4.2', OctetString(severity)),
-            ('1.3.6.1.4.1.99999.4.3', Integer(battery_lvl)),
-            ('1.3.6.1.4.1.99999.4.4', OctetString("Node is offline"))
+            (FAIL_NODE, OctetString(node_id)),
+            (FAIL_SEV, OctetString(severity)),
+            (FAIL_BATT, Integer(battery_lvl)),
+            (FAIL_MSG, OctetString("Node is offline"))
         )
     )
     
