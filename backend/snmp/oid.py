@@ -1,3 +1,4 @@
+#Schema for SNMP
 BASE_OID = "1.3.6.1.4.1.99999"
 
 ALARM_TRAP = BASE_OID + ".1"

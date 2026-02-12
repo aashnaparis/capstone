@@ -7,25 +7,23 @@ import os
 load_dotenv()
 
 def mqtt_format(client, userdata, message):
-    conn = zig_db()
-    cursor = conn.cursor
     topic = message.topic
     payload = message.payload
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     print(f"{topic}:{payload.decode()} at {timestamp}")
 
-    type  = payload[0]
+    type_style = payload[0]
     node_id = payload[1]
     flagged = payload[2]
     battery_msb = payload[3]
     battery_lsb = payload[4]
     battery_lvl = int((battery_msb << 8) | battery_lsb)
 
-    severity = determine_severity(type, flagged)
+    severity = determine_severity(type_style, flagged)
 
     #add query to insert into recieved packet database
-    upsert_msg(type, node_id, battery_lvl, severity, timestamp)
+    upsert_msg(node_id, type_style, battery_lvl, severity, timestamp)
     
     if severity == os.getenv("SEVERITY_CRITICAL"): 
         # insert into alarm database

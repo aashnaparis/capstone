@@ -15,9 +15,9 @@ def alarm_trap(node_id,severity="CRITICAL"):
         NotificationType(
             ObjectIdentity(ALARM_TRAP)
         ).addVarBinds(
-            (ALARM_TRAP_NODE , OctetString(node_id)),
-            (ALARM_TRAP_SEV , OctetString(severity)),
-            (ALARM_TRAP_MSG , OctetString("Emergency Button Pressed"))
+            (ALARM_TRAP_NODE, OctetString(node_id)),
+            (ALARM_TRAP_SEV, OctetString(severity)),
+            (ALARM_TRAP_MSG, OctetString("Emergency Button Pressed"))
         )
     )
 

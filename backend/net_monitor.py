@@ -8,18 +8,18 @@ import os
 load_dotenv()
 
 # function checking for node failure
-def inspect_nodes():
+async def inspect_nodes():
     timeout_sec = int(os.getenv("HEARTBEAT_INTERVAL")) 
     threshold = datetime.utcnow() - timedelta(seconds=timeout_sec)
     dead_nodes = node_check(threshold)
     for node in dead_nodes:
         severity = os.getenv("SEVERITY_FAULT")
         # insert into node failure database
-        offline_update(node.node_id)
+        offline_update(node[0])
         
         # send node failure snmp trap
-        dead_node_trap(node.node_id, node.battery_lvl, severity)
-        print(f"Node Failure, {node.node_id} : Severity, {severity}")
+        dead_node_trap(node[0], node[1], severity)
+        print(f"Node Failure, {node[0]} : Severity, {severity}")
 
 async def monitor():
     while True:

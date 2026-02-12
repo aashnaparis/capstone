@@ -14,9 +14,8 @@ def zig_db():
 
 def create_network():
     conn = zig_db()
-    cursor = conn.cursor
-
-    conn.execute("""
+    cursor = conn.cursor()
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS network (
             node_id TEXT PRIMARY KEY,
             type TEXT,
@@ -31,9 +30,8 @@ def create_network():
 
 def create_alert():
     conn = zig_db()
-    cursor = conn.cursor
-
-    conn.execute("""
+    cursor = conn.cursor()
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS alert (
             node_id TEXT PRIMARY KEY,
             battery_lvl INTEGER,
@@ -46,9 +44,8 @@ def create_alert():
 
 def create_heartbeat():
     conn = zig_db()
-    cursor = conn.cursor
-
-    conn.execute("""
+    cursor = conn.cursor()
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS heartbeat (
             node_id TEXT PRIMARY KEY,
             battery_lvl INTEGER,
@@ -60,31 +57,31 @@ def create_heartbeat():
     cursor.close()
     conn.close()
 
-def upsert_msg(type, node_id, battery_lvl, severity, timestamp):
+def upsert_msg(node_id, type_style, battery_lvl, severity, timestamp):
     conn = zig_db()
-    cursor = conn.cursor
+    cursor = conn.cursor()
     cursor.execute("""
-        INSERT INTO network (node_id, type, battery_lvl, severity, timestamp)
+        INSERT INTO network (node_id, type_style, battery_lvl, severity, timestamp)
         VALUES (%s, %s, %s, %s, %s)
         ON CONFLICT(node_id)
         DO UPDATE SET
-            battery = EXCLUDED.battery_lvl,
+            battery_lvl = EXCLUDED.battery_lvl,
             type = EXCLUDED.type,
             severity = EXCLUDED.severity,
-            timestamp = EXCLUDED.timestamp;""", (type, node_id, battery_lvl, severity, timestamp))
+            timestamp = EXCLUDED.timestamp;""", (node_id,type_style,battery_lvl, severity, timestamp))
     conn.commit()
     cursor.close()
     conn.close()
 
 def upsert_alarm(node_id, battery_lvl, timestamp):
     conn = zig_db()
-    cursor = conn.cursor
+    cursor = conn.cursor()
     cursor.execute(""" 
             INSERT INTO alert (node_id, battery_lvl, timestamp)
             VALUES (%s, %s, %s)
             ON CONFLICT(node_id)
             DO UPDATE SET
-                battery = EXCLUDED.battery_lvl,
+                battery_lvl = EXCLUDED.battery_lvl,
                 timestamp = EXCLUDED.timestamp;""", (node_id, battery_lvl, timestamp))
     conn.commit()
     cursor.close()
@@ -92,13 +89,13 @@ def upsert_alarm(node_id, battery_lvl, timestamp):
 
 def upsert_heartbeat(node_id, battery_lvl, timestamp):
     conn = zig_db()
-    cursor = conn.cursor
+    cursor = conn.cursor()
     cursor.execute("""
             INSERT INTO heartbeat (node_id, battery_lvl, status, timestamp)
-            VALUES (%s, %s, "ONLINE", %s)
+            VALUES (%s, %s, 'ONLINE', %s)
             ON CONFLICT(node_id)
             DO UPDATE SET
-                battery = EXCLUDED.battery_lvl,
+                battery_lvl = EXCLUDED.battery_lvl,
                 timestamp = EXCLUDED.timestamp;""", (node_id, battery_lvl, timestamp))
     conn.commit()
     cursor.close()
@@ -106,31 +103,31 @@ def upsert_heartbeat(node_id, battery_lvl, timestamp):
 
 def node_check(threshold):
     conn = zig_db()
-    cursor = conn.cursor
+    cursor = conn.cursor()
     cursor.execute("""
-        SELECT node_id 
+        SELECT node_id, battery_lvl
         FROM heartbeat 
         WHERE timestamp < %s
         AND status != 'OFFLINE'
-    """, (threshold))
+    """, (threshold,))
     dead_nodes = cursor.fetchall()
     return dead_nodes
     
 
 def offline_update(node_id):
     conn = zig_db()
-    cursor = conn.cursor
+    cursor = conn.cursor()
     cursor.execute("""
-            UPDATE nodes
+            UPDATE heartbeat
             SET status = 'OFFLINE'
-            WHERE node_id = %s""", (node_id))
+            WHERE node_id = %s""", (node_id,))
     conn.commit()
     cursor.close()
     conn.close()
 
 def all_nodes():
     conn = zig_db()
-    cursor = conn.cursor
+    cursor = conn.cursor()
     cursor.execute("""SELECT * from heartbeat""")
     rows = cursor.fetchall()
     cursor.close()
@@ -140,21 +137,27 @@ def all_nodes():
     
 def one_node(node_id):
     conn = zig_db()
-    cursor = conn.cursor
-    cursor.execute("""SELECT node_id FROM network WHERE node_id = %s""",(node_id))
+    cursor = conn.cursor()
+    cursor.execute("""SELECT node_id FROM network WHERE node_id = %s""",(node_id,))
     info = cursor.fetchone()
+    cursor.close()
+    conn.close()
     return info
 
 def all_alarms():
     conn = zig_db()
-    cursor = conn.cursor
+    cursor = conn.cursor()
     cursor.execute("""SELECT * FROM alert""")
     alarms = cursor.fetchall()
+    cursor.close()
+    conn.close()
     return alarms
 
 def all_heartbeats():
     conn = zig_db()
-    cursor = conn.cursor
+    cursor = conn.cursor()
     cursor.execute("""SELECT * FROM heartbeat""")
     heartbeats = cursor.fetchall()
+    cursor.close()
+    conn.close()
     return heartbeats
