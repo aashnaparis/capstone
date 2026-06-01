@@ -9,8 +9,9 @@ load_dotenv()
 
 # function checking for node failure
 async def inspect_nodes():
-    timeout_sec = int(os.getenv("HEARTBEAT_INTERVAL")) 
-    threshold = datetime.utcnow() - timedelta(seconds=timeout_sec)
+    timeout_sec = int(os.getenv("HEARTBEAT_TIMEOUT")) 
+    threshold = datetime.now() - timedelta(seconds=timeout_sec)
+    # print(f"time: {threshold}")
     dead_nodes = node_check(threshold)
     for node in dead_nodes:
         severity = os.getenv("SEVERITY_FAULT")
@@ -18,11 +19,15 @@ async def inspect_nodes():
         offline_update(node[0])
         
         # send node failure snmp trap
-        dead_node_trap(node[0], node[1], severity)
+        dead_node_trap(node[0], node[1], severity) 
         print(f"Node Failure, {node[0]} : Severity, {severity}")
 
 async def monitor():
+    await asyncio.sleep(20)
+
+    check_interval = int(os.getenv("HEARTBEAT_INTERVAL"))
+
     while True:
-        asyncio.create_task(inspect_nodes())
-        await asyncio.sleep(int(os.getenv("HEARTBEAT_TIMEOUT")))
+        await inspect_nodes()
+        await asyncio.sleep(check_interval)
             

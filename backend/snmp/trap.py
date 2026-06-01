@@ -1,11 +1,23 @@
 from pysnmp.hlapi import *
 from dotenv import load_dotenv
-from oid import *
+from datetime import datetime
+from snmp.oid import *
 import os
 
 load_dotenv()
 
-def alarm_trap(node_id,severity="CRITICAL"):
+trap_caught = []
+
+def alarm_trap(node_id,battery_lvl,severity="CRITICAL"):
+
+    trap_caught.append({
+        "type": "ALARM",
+        "node": node_id,
+        "severity": severity,
+        "battery_lvl": battery_lvl,
+        "timestamp": datetime.now().isoformat()
+    })
+
     sendNotification(
         SnmpEngine(),
         CommunityData(os.getenv("SNMP_PASSWORD")),
@@ -22,6 +34,15 @@ def alarm_trap(node_id,severity="CRITICAL"):
     )
 
 def low_battery_trap(node_id, battery_lvl, severity="WARNING"):
+
+    trap_caught.append({
+        "type": "LOW_BATTERY",
+        "node": node_id,
+        "severity": severity,
+        "battery_lvl": battery_lvl,
+        "timestamp": datetime.now().isoformat()
+    })
+
     sendNotification(
         SnmpEngine(),
         CommunityData(os.getenv("SNMP_PASSWORD")),
@@ -38,6 +59,15 @@ def low_battery_trap(node_id, battery_lvl, severity="WARNING"):
     )
 
 def dead_battery_trap(node_id, battery_lvl, severity="MAJOR"):
+
+    trap_caught.append({
+        "type": "DEAD_BATTERY",
+        "node": node_id,
+        "severity": severity,
+        "battery_lvl": battery_lvl,
+        "timestamp": datetime.now().isoformat()
+    })
+
     sendNotification(
         SnmpEngine(),
         CommunityData(os.getenv("SNMP_PASSWORD")),
@@ -54,6 +84,14 @@ def dead_battery_trap(node_id, battery_lvl, severity="MAJOR"):
     )
 
 def dead_node_trap(node_id, battery_lvl, severity="FAULT"):
+
+    trap_caught.append({
+        "type": "DEAD_NODE",
+        "node": node_id,
+        "severity": severity,
+        "battery_lvl": battery_lvl,
+        "timestamp": datetime.now().isoformat()
+    })
     sendNotification(
         SnmpEngine(),
         CommunityData(os.getenv("SNMP_PASSWORD")),
